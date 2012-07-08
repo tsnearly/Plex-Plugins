@@ -1,0 +1,47 @@
+SEARCH_URL = 'http://www.google.com/search?start=0&num=10&q=%s&as_sitesearch=topdocumentaryfilms.com&client=google-csbe&cx=010283173013830464068:6okwqi6lc_i'
+#//*[@id="res"]
+
+####################################################################################################
+def Search(query):
+
+	data = HTML.ElementFromURL(SEARCH_URL % query)
+	oc = ObjectContainer(title2='Search Results')
+
+	for result in data.xpath('.//div[@class="gs-webResult gs-result"]'):
+		title = result.xpath('.//a[@class="gs-title"]')[0].text.strip(' | Watch Free Documentary Online')
+		summary = result.xpath('.//div[@class="gs-bidi-start-align gs-snippet"]')[0].text.strip()
+		video_url = result.xpath('.//a[@class="video-title"]')[0].get('href')
+		thumbUrl = result.xpath('.//img[@class="videoThumb"]')[0].get('src')
+		
+		thumbUrl = result.xpath('.//a[@class="gs-image-box gs-web-image-box gs-web-image-box-portrait"]')
+		
+		try: duration = CalculateDuration(result.xpath('.//p[@class="videoDuration"]')[0].text.split(' ')[0])
+		except: duration = None
+		date = Datetime.ParseDate(result.xpath('.//span[@class="publisherLink"]')[0].text).date()
+
+		oc.add(VideoClipObject(url=video_url, title=title, summary=summary, duration=duration, originally_available_at=date, thumb=thumbUrl))
+
+	return oc    
+
+####################################################################################################
+def CalculateDuration(timecode):
+
+	seconds  = 0
+	duration = timecode.split(':')
+	duration.reverse()
+
+	for i in range(0, len(duration)):
+		seconds += int(duration[i]) * (60**i)
+
+	return seconds * 1000
+
+####################################################################################################
+def GetMovieDetails(url):
+
+	data = HTML.ElementFromURL(url)
+	movie = MovieObject()
+	
+	movie.title = data.xpath('.//h1[@class="postTitle"]')[0].text
+	movie.summary = data.xpath('.//div1[@class="contentpic"]')[0].text.strip("Watch the full documentary now")
+	movie.thumbUrl = data.xpath('.//div1[@class="contentpic"]/img')[0].source
+	movie.video_url = data.xpath('.//iframe')[0].source

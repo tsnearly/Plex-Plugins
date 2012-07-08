@@ -1,4 +1,0 @@
-PlexChannels
-============
-
-Plex Channels
