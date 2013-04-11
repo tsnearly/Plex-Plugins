@@ -1,9 +1,13 @@
+import lxml, simplejson
+from lxml.html import HTML
+
 SEARCH_URL = 'http://www.google.com/search?start=0&num=10&q=%s&as_sitesearch=topdocumentaryfilms.com&client=google-csbe&cx=010283173013830464068:6okwqi6lc_i'
 #//*[@id="res"]
 
 ####################################################################################################
 def Search(query):
 
+	
 	data = HTML.ElementFromURL(SEARCH_URL % query)
 	oc = ObjectContainer(title2='Search Results')
 
@@ -38,10 +42,19 @@ def CalculateDuration(timecode):
 ####################################################################################################
 def GetMovieDetails(url):
 
+	
 	data = HTML.ElementFromURL(url)
-	movie = MovieObject()
+	
+	#movie = MovieObject()
 	
 	movie.title = data.xpath('.//h1[@class="postTitle"]')[0].text
 	movie.summary = data.xpath('.//div1[@class="contentpic"]')[0].text.strip("Watch the full documentary now")
 	movie.thumbUrl = data.xpath('.//div1[@class="contentpic"]/img')[0].source
 	movie.video_url = data.xpath('.//iframe')[0].source
+
+	return
+	
+#def TestGetMovie():
+
+GetMovieDetails('http://topdocumentaryfilms.com/parallel-universes/')
+	
